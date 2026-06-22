@@ -1,5 +1,7 @@
 package com.equall.assignment.ui
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,18 +33,23 @@ fun HomeScreen(
     onEvent: (HomeEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    when (state) {
-        HomeUiState.Loading -> LoadingState(modifier)
-        is HomeUiState.Error -> ErrorState(
-            message = state.message,
-            onRetry = { onEvent(HomeEvent.Retry) },
-            modifier = modifier,
-        )
-        is HomeUiState.Content -> HomeContent(
-            data = state.data,
-            onEvent = onEvent,
-            modifier = modifier,
-        )
+    Crossfade(
+        targetState = state,
+        animationSpec = tween(durationMillis = 280),
+        label = "home-state",
+        modifier = modifier,
+    ) { current ->
+        when (current) {
+            HomeUiState.Loading -> LoadingState()
+            is HomeUiState.Error -> ErrorState(
+                message = current.message,
+                onRetry = { onEvent(HomeEvent.Retry) },
+            )
+            is HomeUiState.Content -> HomeContent(
+                data = current.data,
+                onEvent = onEvent,
+            )
+        }
     }
 }
 
